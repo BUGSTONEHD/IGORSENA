@@ -27,6 +27,10 @@ public class Usuario {
     private String direccion;
     private Date fecha_registro;  // Mongo lo guarda como ISODate
 
+    // Agregar estos campos a tu clase Usuario
+private String gmailAccessToken;
+private String gmailRefreshToken;
+private Long gmailTokenExpiry;
     
 }
 

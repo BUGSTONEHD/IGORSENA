@@ -23,6 +23,19 @@
                     <a href="/analisis" class="block">Análisis y Reportes</a>
                 </li>
                 
+                <li>
+                <button onclick="conectarGmail()" class="px-6 py-3 hover:bg-gray-700">
+                    Conectar Gmail
+                </button>
+
+                <script>
+                    async function conectarGmail() {
+                    const response = await fetch('/api/gmail/authorize', {credentials: 'include'});
+                    const data = await response.json();
+                    window.location.href = data.authorizationUrl;
+                    }
+                </script>
+                </li>
 
             <form th:action="@{/logout}" method="post" class="p-6">
             

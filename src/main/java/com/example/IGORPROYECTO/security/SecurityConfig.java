@@ -21,13 +21,11 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    // Encriptador de contraseñas
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // Provider que conecta Spring Security con tu UserDetailsService
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -36,58 +34,63 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // AuthenticationManager (lo usa el login)
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
 
-    // Configuración HTTP con la nueva API (nada deprecated)
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            // Públicas
-            .requestMatchers("/", "/registro", "/guardar", "/css/**", "/js/**", "/login").permitAll()
-            
-            // Roles específicos por módulo
-            .requestMatchers("/administrador/**").hasRole("DIRECTOR")
-            .requestMatchers("/cliente/**").hasRole("CLIENTE") 
-            .requestMatchers("/trabajador/**").hasRole("TRABAJADOR")
-            .requestMatchers("/supervisor/**").hasRole("SUPERVISOR")
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                // Públicas
+                .requestMatchers("/", "/registro", "/guardar", "/css/**", "/js/**", "/login").permitAll()
+                
+                // Gmail API - permitir callback público
+                .requestMatchers("/gmail/oauth2callback").permitAll()
+                
+                // Roles específicos por módulo
+                .requestMatchers("/administrador/**").hasRole("DIRECTOR")
+                .requestMatchers("/cliente/**").hasRole("CLIENTE") 
+                .requestMatchers("/trabajador/**").hasRole("TRABAJADOR")
+                .requestMatchers("/supervisor/**").hasRole("SUPERVISOR")
 
-            // Análisis y Reportes - ORDEN IMPORTANTE: más específico primero
-            .requestMatchers("/analisis/kpi/**").hasRole("DIRECTOR")
-            .requestMatchers("/analisis/solicitud/**").hasAnyRole("TRABAJADOR", "SUPERVISOR","DIRECTOR")
-            .requestMatchers("/analisis/peticiones/**").hasAnyRole("DIRECTOR", "CLIENTE", "TRABAJADOR", "SUPERVISOR")
-            .requestMatchers("/analisis/**").authenticated()
+                // Análisis y Reportes
+                .requestMatchers("/analisis/kpi/**").hasRole("DIRECTOR")
+                .requestMatchers("/analisis/solicitud/**").hasAnyRole("TRABAJADOR", "SUPERVISOR","DIRECTOR")
+                .requestMatchers("/analisis/peticiones/**").hasAnyRole("DIRECTOR", "CLIENTE", "TRABAJADOR", "SUPERVISOR")
+                .requestMatchers("/analisis/**").authenticated()
 
-            // Proyectos
-            .requestMatchers("/proyectos/nuevo/**").hasAnyRole("TRABAJADOR", "SUPERVISOR", "DIRECTOR")
-            .requestMatchers("/proyectos/**").authenticated()
-            
-            // Recursos
-            .requestMatchers("/recursos/recursoNuevo").hasAnyRole("TRABAJADOR", "SUPERVISOR", "DIRECTOR")
-            .requestMatchers("/recursos/**").authenticated()
-            
-            .requestMatchers("/enviarCorreo").permitAll()
-            // Cualquier otra petición requiere autenticación
-            .anyRequest().authenticated()   
-        )
-        .formLogin(form -> form
-            .loginPage("/login")
-            .defaultSuccessUrl("/home", true)
-            .permitAll()
-        )
-        .logout(logout -> logout
-            .logoutUrl("/logout")
-            .logoutSuccessUrl("/login?logout")
-            .permitAll()
-        );
+                // Proyectos
+                .requestMatchers("/proyectos/nuevo/**").hasAnyRole("TRABAJADOR", "SUPERVISOR", "DIRECTOR")
+                .requestMatchers("/proyectos/**").authenticated()
+                
+                // Recursos
+                .requestMatchers("/recursos/recursoNuevo").hasAnyRole("TRABAJADOR", "SUPERVISOR", "DIRECTOR")
+                .requestMatchers("/recursos/**").authenticated()
+                
+                .requestMatchers("/enviarCorreo").permitAll()
+                
+                // Gmail API - requiere autenticación
+                .requestMatchers("/api/gmail/**").authenticated()
+                .requestMatchers("/gmail/**").authenticated()
+                // Cualquier otra petición requiere autenticación
+                .anyRequest().authenticated()   
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/home", true)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            );
 
-    http.authenticationProvider(authenticationProvider());
+        http.authenticationProvider(authenticationProvider());
 
-    return http.build();
-}
+        return http.build();
+    }
 }

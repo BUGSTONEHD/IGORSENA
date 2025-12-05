@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Enviar Correo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 flex">
+
+    <!-- Sidebar fijo -->
+    <aside class="fixed top-0 left-0 h-full w-64 bg-white shadow-md z-50"
+           th:replace="fragments/sidebar :: sidebar">
+    </aside>
+
+    <!-- Contenido principal -->
+    <main class="flex-1 ml-64 p-10"> <!-- el ml-64 evita que se esconda debajo -->
+
+        <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-8">
+
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Enviar Correo con Gmail</h2>
+
+            <!-- Mensaje -->
+            <p th:if="${respuesta}"
+               th:text="${respuesta}"
+               class="mb-4 p-3 rounded-lg text-white"
+               th:classappend="${respuesta.contains('exitosamente')} ? 'bg-green-600' : 'bg-red-600'">
+            </p>
+
+            <form th:action="@{/mail/send}" method="post" class="space-y-5">
+
+                <!-- Destinatario -->
+                <div>
+                    <label class="block mb-1 font-semibold text-gray-700">Destinatario</label>
+                    <input type="email" name="destinatario" required
+                           class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300">
+                </div>
+
+                <!-- Asunto -->
+                <div>
+                    <label class="block mb-1 font-semibold text-gray-700">Asunto</label>
+                    <input type="text" name="asunto" required
+                           class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300">
+                </div>
+
+                <!-- Mensaje -->
+                <div>
+                    <label class="block mb-1 font-semibold text-gray-700">Mensaje</label>
+                    <textarea name="mensaje" rows="5" required
+                              class="w-full p-3 border rounded-lg focus:ring focus:ring-blue-300"></textarea>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-between items-center pt-4">
+
+                    <a href="/analisis"
+                       class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+                        ← Atrás
+                    </a>
+
+                    <button type="submit"
+                            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                        Enviar Correo
+                    </button>
+
+                </div>
+
+            </form>
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="mt-10"
+                th:replace="fragments/footer :: footer">
+        </footer>
+
+    </main>
+
+</body>
+</html>
